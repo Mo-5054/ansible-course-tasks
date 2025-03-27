@@ -1,0 +1,30 @@
+- name: Install nginx on web servers
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure nginx is installed
+      ansible.builtin.yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+
+    - name: Replace nginx listen port 80 with 90
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/nginx.conf
+        regexp: 'listen\s+90;'
+        line: 'listen 80;'
+      notify:
+        - Restart nginx 
+
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
